@@ -6,7 +6,6 @@ from app.schemas.enums import AppointmentStatus
 
 
 class AppointmentCreate(BaseModel):
-    patient_id: int
     doctor_id: int
     schedule_id: int
     reason: str | None = None

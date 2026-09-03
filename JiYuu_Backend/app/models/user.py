@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -46,11 +46,14 @@ class User(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
+        server_default=func.now(),
         nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
+        server_default=func.now(),
+        onupdate=func.now(),
         nullable=False
     )
 

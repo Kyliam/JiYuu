@@ -4,6 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 
+from app.routers import doctor
+from app.routers import schedule
+from app.routers import appointment
+from app.routers import auth
+from app.routers import user
+
 
 app = FastAPI(
     title="Jiyuu API",
@@ -16,17 +22,45 @@ app = FastAPI(
 async def health_check():
     return {
         "status": "ok",
-        "service": "Jiyuu API",
+        "service": "Jiyuu API"
     }
 
 
 @app.get("/health/db")
 async def database_health(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(text("SELECT 1"))
+    result = await db.execute(
+        text("SELECT 1")
+    )
 
     return {
         "status": "ok",
-        "database": result.scalar(),
+        "database": result.scalar()
     }
+
+
+app.include_router(
+    doctor.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    schedule.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    appointment.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    auth.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    user.router,
+    prefix="/api/v1"
+)

@@ -6,3 +6,6 @@ pydantic-settings
 email-validator
 pytest
 pytest-asyncio
+pyjwt
+pwdlib[argon2]
+python-multipart
