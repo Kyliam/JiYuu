@@ -46,7 +46,25 @@ class ScheduleService:
             db,
             doctor_id
         )
+    
+    async def get_doctor_id_by_user_id(
+        self,
+        db: AsyncSession,
+        user_id: int
+    ) -> int:
 
+        doctor = await self.doctor_repository.get_by_user_id(
+            db,
+            user_id
+        )
+
+        if doctor is None:
+            raise ValueError(
+                "Doctor profile not found"
+            )
+
+        return doctor.id
+    
     async def get_by_doctor_and_date(
         self,
         db: AsyncSession,

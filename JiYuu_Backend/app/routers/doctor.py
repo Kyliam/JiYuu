@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 
 from app.dependencies.database import DBSession
 from app.dependencies.services import DoctorServiceDep
-from app.schemas.doctor import DoctorResponse
-
+from app.schemas.doctor import DoctorCreate, DoctorResponse
+from app.dependencies.authorization import ReceptionistUser
 
 router = APIRouter(
     prefix="/doctors",
@@ -40,3 +40,32 @@ async def get_doctor(
         )
 
     return doctor
+
+@router.post(
+    "",
+    response_model=DoctorResponse,
+    status_code=201
+)
+async def create_doctor(
+    data: DoctorCreate,
+    current_user: ReceptionistUser,
+    db: DBSession,
+    service: DoctorServiceDep,
+):
+    try:
+        doctor = await service.create(
+            db,
+            data
+        )
+
+        await db.commit()
+
+        return doctor
+
+    except ValueError as e:
+        await db.rollback()
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )

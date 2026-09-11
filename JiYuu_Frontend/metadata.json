@@ -1,0 +1,6 @@
+{
+  "name": "JiYuu - Hệ Thống Đặt Lịch & Quản Lý Khám Bệnh",
+  "description": "Hệ thống đặt lịch khám bệnh trực tuyến và quản lý phòng khám chuyên nghiệp JiYuu dành cho Bệnh nhân, Bác sĩ, Tiếp tân và Quản trị viên.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

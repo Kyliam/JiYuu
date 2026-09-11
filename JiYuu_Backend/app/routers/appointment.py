@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 
+from app.dependencies.authorization import PatientUser
 from app.dependencies.database import DBSession
 from app.dependencies.services import AppointmentServiceDep
-from app.dependencies.auth import CurrentUser
+from app.dependencies.authorization import DoctorUser
 
 from app.schemas.appointment import (
     AppointmentCreate,
-    AppointmentResponse
+    AppointmentResponse,
 )
 
 
@@ -15,70 +16,51 @@ router = APIRouter(
     tags=["Appointments"]
 )
 
-
 @router.get(
-    "/{appointment_id}",
-    response_model=AppointmentResponse
-)
-async def get_appointment(
-    appointment_id: int,
-    db: DBSession,
-    service: AppointmentServiceDep
-):
-    appointment = await service.get_by_id(
-        db,
-        appointment_id
-    )
-
-    if appointment is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Appointment not found"
-        )
-
-    return appointment
-
-
-@router.get(
-    "/patient/{patient_id}",
+    "/me",
     response_model=list[AppointmentResponse]
 )
-async def get_patient_appointments(
-    patient_id: int,
+async def get_my_appointments(
+    current_user: PatientUser,
     db: DBSession,
-    service: AppointmentServiceDep
+    service: AppointmentServiceDep,
 ):
     return await service.get_by_patient(
         db,
-        patient_id
+        current_user.id
     )
-
 
 @router.get(
-    "/doctor/{doctor_id}",
+    "/doctor/me",
     response_model=list[AppointmentResponse]
 )
-async def get_doctor_appointments(
-    doctor_id: int,
+async def get_my_doctor_appointments(
+    current_user: DoctorUser,
     db: DBSession,
-    service: AppointmentServiceDep
+    service: AppointmentServiceDep,
 ):
-    return await service.get_by_doctor(
-        db,
-        doctor_id
-    )
+    try:
+        return await service.get_by_current_doctor(
+            db,
+            current_user.id
+        )
 
-
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    
 @router.post(
     "",
     response_model=AppointmentResponse,
-    status_code=201
+    status_code=status.HTTP_201_CREATED
 )
 async def create_appointment(
     data: AppointmentCreate,
-    current_user: CurrentUser,
+    current_user: PatientUser,
     db: DBSession,
-    service: AppointmentServiceDep
+    service: AppointmentServiceDep,
 ):
     try:
         appointment = await service.create(
@@ -95,6 +77,6 @@ async def create_appointment(
         await db.rollback()
 
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )

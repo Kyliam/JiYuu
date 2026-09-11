@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.schedule import Schedule
+from app.schemas.schedule import ScheduleUpdate
 
 
 class ScheduleRepository:
@@ -84,6 +85,24 @@ class ScheduleRepository:
     ) -> Schedule:
 
         db.add(schedule)
+
+        await db.flush()
+        await db.refresh(schedule)
+
+        return schedule
+    async def update(
+        self,
+        db: AsyncSession,
+        schedule: Schedule,
+        data: ScheduleUpdate
+    ) -> Schedule:
+
+        update_data = data.model_dump(
+            exclude_unset=True
+        )
+
+        for field, value in update_data.items():
+            setattr(schedule, field, value)
 
         await db.flush()
         await db.refresh(schedule)
